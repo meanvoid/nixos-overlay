@@ -1,6 +1,23 @@
-{ stdenv, git, gtk2, fetchgit, cmake
-, SDL2, SDL2_gfx, SDL2_image, SDL2_mixer, SDL_mixer, SDL2_net, SDL2_ttf, SDL, SDL_ttf
-, pkg-config, glib, pcre, openssl }:
+{ 
+  stdenv, 
+  git, 
+  gtk2, 
+  fetchgit, 
+  cmake, 
+  SDL2, 
+  SDL2_gfx, 
+  SDL2_image, 
+  SDL2_mixer, 
+  SDL_mixer, 
+  SDL2_net, 
+  SDL2_ttf, 
+  SDL, 
+  SDL_ttf, 
+  pkg-config, 
+  glib, 
+  pcre, 
+  openssl 
+}:
 
 stdenv.mkDerivation {
   name = "np2kai";
