@@ -17,7 +17,7 @@
       };
     in {
       overlays.default =  (final: prev: rec {
-        test = final.callPackage = ./pkgs/test { };
+        test = final.callPackage ./pkgs/test { };
       });
       packages.x86_64-linux = pkgs;
     };
