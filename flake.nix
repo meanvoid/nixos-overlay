@@ -17,7 +17,7 @@
       };
     in {
       overlays.default =  (final: prev: rec {
-        thcrap = final.callPackage ./pkgs/misc/thcrap-wrapper {};
+        thcrap-wrapper = final.callPackage ./pkgs/misc/thcrap-wrapper {};
       });
       packages.x86_64-linux = pkgs;
     };
