@@ -15,8 +15,9 @@
       };
     in {
       overlays.default = (final: prev: rec {
-        thcrap-wrapper = final.callPackage ./pkgs/misc/thcrap-wrapper {};
+        test = final.callPackage ./pkgs/fonts/test {};
+        thcrap-wrapper = final.callPackage ./pkgs/misc/steam/thcrap-wrapper {};
       });
-      packages.${system} = pkgs.callPackage ./default.nix {};  
+      packages.${system} = pkgs; 
     };
   }
