@@ -17,5 +17,6 @@
       overlays.default = (final: prev: rec {
         thcrap-wrapper = final.callPackage ./pkgs/misc/thcrap-wrapper {};
       });
-      packages.${system} = pkgs;
-}
+      packages.${system} = pkgs;  
+    };
+  }
