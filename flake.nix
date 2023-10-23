@@ -10,14 +10,15 @@
       system = "x86_64-linux";
       pkgs = import nixpkgs {
         inherit system;
-        overlays = [self.overlays.default];
+        overlays = [
+          self.overlays.default
+        ];
         config = { allowUnfree = true; };
       };
     in {
-      overlays.default = (final: prev: rec {
-        test = final.callPackage ./pkgs/fonts/test {};
-        thcrap-wrapper = final.callPackage ./pkgs/misc/steam/thcrap-wrapper {};
+      overlays.default =  (final: prev: rec {
+        test = final.callPackage = ./pkgs/test { };
       });
-      packages.${system} = pkgs; 
+      packages.x86_64-linux = pkgs;
     };
-  }
+}

@@ -8,7 +8,7 @@
   makeWrapper,
   pkgs,
 }:
-pkgs.stdenv.mkDerivation {
+stdenv.mkDerivation {
   pname = "thcrap-wrapper";
   version = "0dee52f";
   src = fetchFromGitHub {
