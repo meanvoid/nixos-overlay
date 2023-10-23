@@ -16,7 +16,7 @@ stdenv.mkDerivation {
     rev = "519e82ca48709cfa71b02bb24c33647307f8eb50";
     sha256 = "0g4w5qb4ggn1q1rn2d2y6blhfnnhlci9d2v9j72123vga0z2hnnn";
   };
-  buildInputs = [bash subversion zenith];
+  buildInputs = [bash subversion zenity];
   nativeBuildInputs = [makeWrapper];
   installPhase = ''
     mkdir -p $out/bin
