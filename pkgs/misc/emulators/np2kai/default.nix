@@ -1,8 +1,8 @@
 { 
   stdenv, 
   git, 
-  gtk2, 
-  fetchgit, 
+  fetchgit,
+  gtk2,  
   cmake, 
   SDL2, 
   SDL2_gfx, 
@@ -21,7 +21,6 @@
 
 stdenv.mkDerivation {
   name = "np2kai";
-
   src = fetchgit {
     url = "https://github.com/AZO234/NP2kai.git";
     rev = "6d461afcb6dd294829e81400573d6fa79e1a0fb1";
