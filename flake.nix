@@ -17,7 +17,7 @@
       };
     in {
       overlays.default =  (final: prev: rec {
-        thcrap-wrapper = final.callPackage ./pkgs/misc/steam/thcrap-wrapper {};
+        thcrap = final.callPackage ./pkgs/misc/steam/thcrap {};
         np2kai = final.callPackage ./pkgs/misc/emulators/np2kai {};
       });
       packages.x86_64-linux = pkgs;

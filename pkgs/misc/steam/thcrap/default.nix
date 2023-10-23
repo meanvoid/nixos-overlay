@@ -10,7 +10,7 @@
   openssl
 }:
 stdenv.mkDerivation {
-  name = "thcrap-wrapper";
+  name = "thcrap";
 
   src = fetchgit {
     url = "https://github.com/tactikauan/thcrap-steam-proton-wrapper.git";
