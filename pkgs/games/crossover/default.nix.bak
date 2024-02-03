@@ -1,0 +1,92 @@
+{
+  lib,
+  stdenv,
+  fetchurl,
+  dpkg,
+  autoPatchelfHook,
+  makeWrapper,
+  pkgs,
+  steam,
+  wrapGAppsHook,
+  gobject-introspection,
+  glibc_multi,
+  gsettings-desktop-schemas,
+}: let
+  gds = gsettings-desktop-schemas;
+  libraries = with pkgs; [
+    gnutls
+    openldap
+    gmp
+    openssl
+    gst_all_1.gstreamer
+    gst_all_1.gst-plugins-good
+    gst_all_1.gst-plugins-ugly
+    gst_all_1.gst-plugins-base
+    libunwind
+    sane-backends
+    libgphoto2
+    openal
+    apulse
+    libpcap
+    vte
+  ];
+in
+  stdenv.mkDerivation rec {
+    pname = "crossover-unwrapped";
+    version = "23.7.1-1";
+
+    nativeBuildInputs = [
+      glibc_multi
+      wrapGAppsHook
+      gobject-introspection
+      dpkg
+    ];
+    buildInputs = [
+      pkgs.gtkdialog
+      pkgs.gtk3
+      pkgs.vte
+      (pkgs.python3.withPackages (p:
+        with p; [
+          pygobject3
+          gst-python
+          dbus-python
+          pycairo
+        ]))
+    ];
+    src = fetchurl {
+      url = "https://media.codeweavers.com/pub/crossover/cxlinux/demo/crossover_${version}.deb";
+      sha256 = "sha256-aTEakY9IiPd3oLmuV+f8ecyqrj+9Y8/0yNJCdC2H64E=";
+    };
+
+    unpackCmd = "dpkg -x $src source";
+    dontWrapGApps = true;
+    preFixup = ''
+      makeWrapperArgs+=("''${gappsWrapperArgs[@]}")
+    '';
+    installPhase = ''
+      mkdir -p $out/opt
+      mv opt/* $out/opt/
+
+      mv usr $out/usr
+
+      makeWrapper $out/opt/cxoffice/bin/crossover $out/bin/crossover \
+        --add-flags $out/opt/cxoffice/bin/crossover \
+        --set-default GSETTINGS_SCHEMA_DIR "${gds}/share/gsettings-schemas/${gds.pname}-${gds.version}/glib-2.0/schemas"
+
+      runHook preFixup
+      runHook postInstall
+    '';
+    postInstall = ''
+      rmdir $out/opt/cxoffice/etc
+      ln -s /etc/cxoffice/license.txt $out/opt/cxoffice
+      ln -s /etc/cxoffice $out/opt/cxoffice/etc
+    '';
+
+    meta = with lib; {
+      homepage = "https://www.codeweavers.com/crossover";
+      description = "Run your Windows® app on MacOS, Linux, or ChromeOS";
+      license = licenses.gpl3Only;
+      platforms = ["x86_64-linux"];
+      mainProgram = "crossover";
+    };
+  }

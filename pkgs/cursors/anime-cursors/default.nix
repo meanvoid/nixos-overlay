@@ -11,7 +11,6 @@
   # product = lib.attrsets.cartesianProductOfSets dimensions;
   # variantName = { palette, color }: (lib.strings.toLower palette) + color;
   # variants = map variantName product;
-
   # Credit: https://github.com/NixOS/nixpkgs/blob/master/pkgs/data/icons/catppuccin-cursors/default.nix
   dimensions = {
     variant = [

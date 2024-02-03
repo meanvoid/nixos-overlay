@@ -21,7 +21,11 @@
     overlayAttrs = config.packages;
 
     packages = {
-      thcrap-proton = pkgs.callPackage ./steam/thcrap-proton {};
+      crossover = pkgs.callPackage ./games/crossover/crossover.nix {};
+      crossover-fhsenv = pkgs.callPackage ./games/crossover/fhsenv.nix {
+        inherit (config.packages) crossover;
+      };
+      thcrap-proton = pkgs.callPackage ./games/steam/thcrap-proton {};
       anime-cursors = pkgs.callPackage ./cursors/anime-cursors {};
     };
   };
