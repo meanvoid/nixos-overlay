@@ -4,6 +4,8 @@
   inputs = {
     nixpkgs.url = "github:NixOS/nixpkgs/nixpkgs-unstable";
     flake-parts.url = "github:hercules-ci/flake-parts";
+    pre-commit-hooks-nix.url = "github:cachix/pre-commit-hooks.nix";
+    devshell.url = "github:numtide/devshell";
   };
 
   outputs = {self, ...} @ inputs:
@@ -18,11 +20,18 @@
       };
 
       imports = [
+        inputs.pre-commit-hooks-nix.flakeModule
+        inputs.devshell.flakeModule
         ./pkgs
       ];
 
       perSystem = {pkgs, ...}: {
         formatter = pkgs.alejandra;
+        devshells.default = {
+          packages = with pkgs; [
+            alejandra
+          ];
+        };
       };
     };
 }
