@@ -12,18 +12,20 @@
     system,
     pkgs,
     ...
-  }: {
+  } @ args: let
+    overlayAttrs = config.packages;
+  in {
     _module.args.pkgs = import inputs.nixpkgs {
       inherit system;
       config.allowUnfree = true;
     };
 
     overlayAttrs = config.packages;
-
     packages = {
-      crossover = pkgs.callPackage ./games/crossover/crossover.nix {};
-      crossover-fhsenv = pkgs.callPackage ./games/crossover/fhsenv.nix {
-        inherit (config.packages) crossover;
+      crossover-deprecated = pkgs.callPackage ./games/crossover {};
+      crossover-unwrapped = pkgs.callPackage ./games/crossover/unwrapped.nix {};
+      crossover = pkgs.callPackage ./games/crossover/fhsenv.nix {
+        inherit (overlayAttrs) crossover-unwrapped;
       };
       thcrap-proton = pkgs.callPackage ./games/steam/thcrap-proton {};
       anime-cursors = pkgs.callPackage ./cursors/anime-cursors {};
