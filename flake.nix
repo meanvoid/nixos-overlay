@@ -2,7 +2,7 @@
   description = "Collection of random packages";
 
   inputs = {
-    nixpkgs.url = "github:NixOS/nixpkgs/nixpkgs-unstable";
+    nixpkgs.url = "github:NixOS/nixpkgs/nixos-23.11";
     flake-parts.url = "github:hercules-ci/flake-parts";
     pre-commit-hooks-nix.url = "github:cachix/pre-commit-hooks.nix";
     devshell.url = "github:numtide/devshell";
