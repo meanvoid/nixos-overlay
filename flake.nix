@@ -30,6 +30,7 @@
         devshells.default = {
           packages = with pkgs; [
             alejandra
+            bintools
           ];
         };
       };

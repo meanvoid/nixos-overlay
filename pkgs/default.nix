@@ -19,12 +19,12 @@
     };
 
     overlayAttrs = config.packages;
-
     packages = {
-      crossover = pkgs.callPackage ./games/crossover/crossover.nix {};
-      crossover-fhsenv = pkgs.callPackage ./games/crossover/fhsenv.nix {
-        inherit (config.packages) crossover;
+      crossover = pkgs.callPackage ./games/crossover {
+        fhsenv = (pkgs.callPackage ./games/crossover/fhsenv.nix {}).override;
+        unwrapped = pkgs.callPackage ./games/crossover/unwrapped.nix {};
       };
+      crossover-test = pkgs.callPackage ./games/crossover/test.nix {};
       thcrap-proton = pkgs.callPackage ./games/steam/thcrap-proton {};
       anime-cursors = pkgs.callPackage ./cursors/anime-cursors {};
     };
