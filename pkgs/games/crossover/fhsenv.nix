@@ -50,61 +50,63 @@
   # TODO: custom FHS env instead of using steam-run
   steam-run-custom =
     (steam.override {
-      extraPkgs = pkgs: with pkgs;
-        [
-          vkbasalt
-        ]
-        ++ extraPackages pkgs;
-      extraLibraries = pkgs: with pkgs;
-        [
-          alsa-lib
-          cups
-          dbus
-          fontconfig
-          freetype
-          glib
-          gnutls
-          libglvnd
-          gsm
-          libgphoto2
-          libjpeg_turbo
-          libkrb5
-          libpcap
-          libpng
-          libpulseaudio
-          libtiff
-          libunwind
-          libusb1
-          libv4l
-          libxml2
-          mpg123
-          ocl-icd
-          openldap
-          samba4
-          sane-backends
-          SDL2
-          udev
-          vulkan-loader
+      extraPkgs = pkgs:
+        with pkgs;
+          [
+            vkbasalt
+          ]
+          ++ extraPackages pkgs;
+      extraLibraries = pkgs:
+        with pkgs;
+          [
+            alsa-lib
+            cups
+            dbus
+            fontconfig
+            freetype
+            glib
+            gnutls
+            libglvnd
+            gsm
+            libgphoto2
+            libjpeg_turbo
+            libkrb5
+            libpcap
+            libpng
+            libpulseaudio
+            libtiff
+            libunwind
+            libusb1
+            libv4l
+            libxml2
+            mpg123
+            ocl-icd
+            openldap
+            samba4
+            sane-backends
+            SDL2
+            udev
+            vulkan-loader
 
-          # https://www.gloriouseggroll.tv/how-to-get-out-of-wine-dependency-hell/
-          alsa-plugins
-          dosbox
-          giflib
-          gtk3
-          libva
-          libxslt
-          ncurses
-          openal
+            # https://www.gloriouseggroll.tv/how-to-get-out-of-wine-dependency-hell/
+            alsa-plugins
+            dosbox
+            giflib
+            gtk3
+            libva
+            libxslt
+            ncurses
+            openal
 
-          # Steam runtime
-          libgcrypt
-          libgpg-error
-          p11-kit
-          zlib # Freetype
-        ]
-        ++ xorgDeps pkgs
-        ++ gstreamerDeps pkgs
-        ++ extraLibs pkgs;
+            # Steam runtime
+            libgcrypt
+            libgpg-error
+            p11-kit
+            zlib # Freetype
+          ]
+          ++ xorgDeps pkgs
+          ++ gstreamerDeps pkgs
+          ++ extraLibs pkgs;
       extraProfile = ''
         export PATH=${fakePkExec}/bin:$PATH
       '';
@@ -135,7 +137,7 @@
       iconPath =
         if unwrapped.passthru.customIcon != null
         then unwrapped.passthru.customIcon
-        else "${unwrapped}/opt/cxoffice/share/images/welcomeCrossOverIcon_src.png";
+        else "${unwrapped}/opt/cxoffice/share/icons/64x64/crossover.png";
     in ''
       mkdir -p $out/share/pixmaps
       cp ${iconPath} $out/share/pixmaps/${packageName}.png
@@ -146,7 +148,7 @@
     name = binName;
     inherit desktopName;
     genericName = desktopName;
-    exec = "${wrapper}/bin/${binName}";
+    exec = "${wrapper}/bin/${binName} %u";
     icon = packageName;
     categories = ["Game"];
     startupWMClass = packageName;

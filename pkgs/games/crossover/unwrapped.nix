@@ -63,7 +63,7 @@ in
           ]))
       ];
       format = "other";
-      # dontWrapGApps = true;
+      dontWrapGApps = true;
 
       unpackCmd = "dpkg -x $src source";
 
