@@ -25,6 +25,7 @@
         unwrapped = pkgs.callPackage ./games/crossover/unwrapped.nix {};
       };
       crossover-test = pkgs.callPackage ./games/crossover/test.nix {};
+      crossover-test2 = pkgs.callPackage ./games/crossover/test2.nix {};
       thcrap-proton = pkgs.callPackage ./games/steam/thcrap-proton {};
       anime-cursors = pkgs.callPackage ./cursors/anime-cursors {};
     };

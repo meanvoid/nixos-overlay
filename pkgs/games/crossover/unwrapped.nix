@@ -1,47 +1,20 @@
 {
   lib,
-  fetchurl,
   stdenv,
-  runtimeShell,
-  traceDeps ? true,
+  fetchurl,
   dpkg,
-  glibc_multi,
+  autoPatchelfHook,
+  makeWrapper,
+  pkgs,
+  steam-run,
   wrapGAppsHook,
   gobject-introspection,
-  gtkdialog,
-  gtk3,
-  vte,
-  python3Packages,
-  steam,
-  steam-run,
+  glibc_multi,
   gsettings-desktop-schemas,
   customIcon ? null,
 }: let
   gds = gsettings-desktop-schemas;
   version = "23.7.1";
-
-  steam-run = (steam.override {
-    extraLibraries = pkgs: with pkgs; [
-      gnutls
-      openldap
-      gmp
-      openssl
-      gst_all_1.gstreamer
-      gst_all_1.gst-plugins-good
-      gst_all_1.gst-plugins-ugly
-      gst_all_1.gst-plugins-base
-      libunwind
-      sane-backends
-      libgphoto2
-      openal
-      apulse
-
-      libpcap
-      sane-backends
-      ocl-icd
-      libxcrypt-legacy
-    ];
-  }).run;
 in
   with lib;
     stdenv.mkDerivation {
@@ -54,29 +27,43 @@ in
       };
 
       nativeBuildInputs = [
-        dpkg
         glibc_multi
+        autoPatchelfHook
         wrapGAppsHook
         gobject-introspection
+        makeWrapper
+        dpkg
+      ];
+      autoPatchelfIgnoreMissingDeps = [
+        "libpcap.so.0.8"
+        "libcapi20.so.3"
       ];
 
-      buildInputs = with python3Packages;
-        [
-          pygobject3
-          gst-python
-          dbus-python
-          pycairo
-        ]
-        ++ [
-          gtkdialog
-          gtk3
-          vte
-          steam-run
-          python
-        ];
-
+      buildInputs = [
+        steam-run
+        pkgs.gtkdialog
+        pkgs.gtk3
+        pkgs.vte
+        pkgs.libgphoto2
+        pkgs.sane-backends
+        pkgs.ocl-icd
+        pkgs.pkgs.alsa-lib
+        pkgs.pulseaudio
+        pkgs.libxcrypt-legacy
+        pkgs.gst_all_1.gstreamer
+        pkgs.gst_all_1.gst-plugins-base
+        pkgs.gst_all_1.gst-plugins-good
+        pkgs.gst_all_1.gst-plugins-ugly
+        (pkgs.python310.withPackages (p:
+          with p; [
+            pygobject3
+            gst-python
+            dbus-python
+            pycairo
+          ]))
+      ];
       format = "other";
-      dontWrapGApps = true;
+      # dontWrapGApps = true;
 
       unpackCmd = "dpkg -x $src source";
 
@@ -88,10 +75,6 @@ in
         mkdir -p $out/opt
         mv opt/* $out/opt/
         mv usr $out/usr
-
-        makeWrapper ${steam-run}/bin/steam-run $out/bin/crossover \
-          --add-flags $out/opt/cxoffice/bin/crossover \
-          --set-default GSETTINGS_SCHEMA_DIR "${gds}/share/gsettings-schemas/${gds.pname}-${gds.version}/glib-2.0/schemas"
 
         runHook preFixup
         runHook postInstall
@@ -105,3 +88,7 @@ in
 
       passthru = {inherit version customIcon;};
     }
+# makeWrapper $out/bin/crossover \
+#    --add-flags $out/opt/cxoffice/bin/crossover \
+#   --set-default GSETTINGS_SCHEMA_DIR "${gds}/share/gsettings-schemas/${gds.pname}-${gds.version}/glib-2.0/schemas"
+
