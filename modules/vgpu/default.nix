@@ -179,7 +179,7 @@ in {
               for i in libnvidia-vgpu.so.${vgpu} libnvidia-vgxcfg.so.${vgpu}; do
                 install -Dm755 "$i" "$out/lib/$i"
               done
-              patchelf --set-rpath ${stdenv.cc.cc.lib}/lib $out/lib/libnvidia-vgpu.so.${vgpu}
+              patchelf --set-rpath ${pkgs.stdenv.cc.cc.lib}/lib $out/lib/libnvidia-vgpu.so.${vgpu}
               install -Dm644 vgpuConfig.xml $out/vgpuConfig.xml
 
               for i in nvidia-vgpud nvidia-vgpu-mgr; do
