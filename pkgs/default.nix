@@ -22,13 +22,16 @@
 
     overlayAttrs = config.packages;
     packages = {
-      crossover-deprecated = pkgs.callPackage ./games/crossover {};
+      crossover-deprecated = pkgs.callPackage ./games/crossover/deprecated.nix {};
       crossover-unwrapped = pkgs.callPackage ./games/crossover/unwrapped.nix {};
       crossover = pkgs.callPackage ./games/crossover/fhsenv.nix {
         inherit (overlayAttrs) crossover-unwrapped;
       };
       thcrap-proton = pkgs.callPackage ./games/steam/thcrap-proton {};
       anime-cursors = pkgs.callPackage ./cursors/anime-cursors {};
+
+      # modules
+      vgpu-unwrapped = pkgs.callPackage ../modules/vgpu/derivation.nix {};
     };
   };
 }

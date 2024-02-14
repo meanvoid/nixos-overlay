@@ -6,6 +6,7 @@
     flake-parts.url = "github:hercules-ci/flake-parts";
     pre-commit-hooks-nix.url = "github:cachix/pre-commit-hooks.nix";
     devshell.url = "github:numtide/devshell";
+    frida.url = "github:itstarsun/frida-nix";
   };
 
   outputs = {self, ...} @ inputs:
@@ -13,6 +14,7 @@
       flake.nixosModules = let
         inherit (inputs.nixpkgs) lib;
       in {
+        vgpu = import ./modules/vgpu/default.nix;
         default = throw (lib.mdDoc ''
           default is deprecated
           ${builtins.concatStringsSep "\n" (lib.filter (name: name != "default") (lib.attrNames self.nixosModules))}
@@ -33,6 +35,8 @@
             bintools
             findutils
             nix-index
+            nix-prefetch-github
+            nix-prefetch-scripts
           ];
         };
       };
