@@ -9,8 +9,8 @@
   p7zip,
   coreutils,
   pciutils,
-}:
-with lib; let
+  mdevctl,
+}: let
   gnrl = "535.129.03";
   vgpu = "535.129.03";
   grid = "535.129.03";

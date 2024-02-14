@@ -14,9 +14,9 @@
       flake.nixosModules = let
         inherit (inputs.nixpkgs) lib;
       in {
-        vgpu = import ./modules/vgpu/default.nix;
+        nvidiaVgpu = import ./modules/vgpu/default.nix;
         default = throw (lib.mdDoc ''
-          default is deprecated
+          The usage of default module is deprecated
           ${builtins.concatStringsSep "\n" (lib.filter (name: name != "default") (lib.attrNames self.nixosModules))}
         '');
       };
