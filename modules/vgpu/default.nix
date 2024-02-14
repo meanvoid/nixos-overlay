@@ -2,10 +2,6 @@
   lib,
   config,
   pkgs,
-  stdenv,
-  fetchFromGitHub,
-  fetchurl,
-  buildPythonPackage,
   frida,
   ...
 }: let
@@ -23,22 +19,22 @@ in let
   cfg = config.hardware.nvidia.vgpu;
   frida = frida.packages.${pkgs.system}.frida-tools;
 
-  compiled-driver = stdenv.mkDerivation rec {
+  compiled-driver = pkgs.stdenv.mkDerivation rec {
     name = "driver-compile";
     system = "x86_64-linux";
 
-    src = fetchFromGitHub {
+    src = pkgs.fetchFromGitHub {
       owner = "VGPU-Community-Drivers";
       repo = "vGPU-Unlock-patcher";
       rev = "e5288921f79b28590caec6b5249bcac92b6641cb";
       sha256 = "sha256-dt6aWul7vZ7fiNgLDsyF9+MXDjIDxGagQ0HzU2NOb8U=";
       fetchSubmodules = true;
     };
-    generalDriver = fetchurl {
+    generalDriver = pkgs.fetchurl {
       url = "https://download.nvidia.com/XFree86/Linux-x86_64/${gnrl}/NVIDIA-Linux-x86_64-${gnrl}.run";
       sha256 = "sha256-5tylYmomCMa7KgRs/LfBrzOLnpYafdkKwJu4oSb/AC4=";
     };
-    vgpuDriver = stdenv.fetchurlBoot {
+    vgpuDriver = pkgs.stdenv.fetchurlBoot {
       url = "https://www.tenjin-dk.com/archive/nvidia/NVIDIA-Linux-x86_64-535.129.03-vgpu-kvm.run";
       sha256 = "sha256-KlOUDaFsfIvwAeXaD1OYMZL00J7ITKtxP7tCSsEd90M=";
     };
@@ -57,9 +53,9 @@ in let
       cp -a $generalDriver NVIDIA-Linux-x86_64-${gnrl}.run
 
       if ${kernel-at-least-6}; then
-         pkgs.bash ./patch.sh --repack general-merge
+        bash ./patch.sh --repack general-merge
       else
-        pkgs.bash ./patch.sh --repack general-merge
+        bash ./patch.sh --repack general-merge
       fi
       cp -a NVIDIA-Linux-x86_64-${gnrl}-merged-vgpu-kvm-patched.run $out
     '';
