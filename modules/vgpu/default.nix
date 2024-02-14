@@ -6,7 +6,7 @@
   fetchFromGitHub,
   fetchurl,
   buildPythonPackage,
-  frida-tools,
+  frida,
   ...
 }: let
   gnrl = "535.129.03";
@@ -21,7 +21,7 @@
 in let
   #!! Todo upstream the vgpu-unlock and patch
   cfg = config.hardware.nvidia.vgpu;
-  frida = frida-tools;
+  frida = frida.packages.${pkgs.system}.frida-tools;
 
   compiled-driver = stdenv.mkDerivation rec {
     name = "driver-compile";
