@@ -209,7 +209,7 @@ in {
           imageFile = pkgs.dockerTools.pullImage {
             imageName = "collinwebdesigns/fastapi-dls";
             imageDigest = "sha256:f12c60e27835f3cf2f43ea358d7c781a521f6427a3fffd1dbb1c876de3e16e70";
-            sha256 = "sha256-8Sxg4ng1888vQ+o1jXx4GlIfZCej//0duxyHbePhbnA=";
+            sha256 = "sha256-OSr7XtVmTTaKmiYKxRz2jePfNW87qIquznM/ZP+rXFY=";
           };
           volumes = [
             "${cfg.fastapi-dls.docker-directory}/fastapi-dls/cert:/app/cert:rw"
