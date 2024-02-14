@@ -13,8 +13,9 @@
     inputs.flake-parts.lib.mkFlake {inherit inputs;} {
       flake.nixosModules = let
         inherit (inputs.nixpkgs) lib;
+        inherit (inputs.frida) frida-tools;
       in {
-        nvidiaVgpu = import ./modules/vgpu/default.nix;
+        nvidiaVgpu = import ./modules/vgpu/default.nix frida-tools;
         default = throw (lib.mdDoc ''
           The usage of default module is deprecated
           ${builtins.concatStringsSep "\n" (lib.filter (name: name != "default") (lib.attrNames self.nixosModules))}
