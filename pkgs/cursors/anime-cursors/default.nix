@@ -46,7 +46,7 @@ in
       owner = "ashuramaruzxc";
       repo = "anime-cursors";
       rev = "${version}";
-      sha256 = "sha256-SjBEShR+g/RT2aILRz/g/ORe1jVRpxjwi0GLW7Un4Q0=";
+      sha256 = "sha256-tfPvvvthjuVOK+/bE6LW/T6g8ebRxF2QI66WtrCrDg0=";
       sparseCheckout = ["cursors"];
     };
 
