@@ -1,18 +1,11 @@
 {
   lib,
   config,
+  pkgs,
   stdenv,
   fetchFromGitHub,
   fetchurl,
-  fetchurlBoot,
-  dockerTools,
-  p7zip,
-  coreutils,
-  pciutils,
-  mdevctl,
-  unzip,
-  bash,
-  zstd,
+  ...
 }: let
   gnrl = "535.129.03";
   vgpu = "535.129.03";
@@ -46,7 +39,7 @@ in let
       sha256 = "sha256-KlOUDaFsfIvwAeXaD1OYMZL00J7ITKtxP7tCSsEd90M=";
     };
 
-    nativeBuildInputs = [coreutils unzip bash zstd];
+    nativeBuildInputs = [pkgs.coreutils pkgs.unzip pkgs.bash pkgs.zstd];
 
     buildPhase = ''
       mkdir -p $out
@@ -60,9 +53,9 @@ in let
       cp -a $generalDriver NVIDIA-Linux-x86_64-${gnrl}.run
 
       if ${kernel-at-least-6}; then
-         bash ./patch.sh --repack general-merge
+         pkgs.bash ./patch.sh --repack general-merge
       else
-        bash ./patch.sh --repack general-merge
+        pkgs.bash ./patch.sh --repack general-merge
       fi
       cp -a NVIDIA-Linux-x86_64-${gnrl}-merged-vgpu-kvm-patched.run $out
     '';
@@ -141,16 +134,16 @@ in {
                 sed -i 's|/usr/share/nvidia/vgpu|/etc/nvidia-vgpu-xxxxx|' nvidia-vgpud
 
                 substituteInPlace sriov-manage \
-                  --replace lspci ${pciutils}/bin/lspci \
-                  --replace setpci ${pciutils}/bin/setpci
+                  --replace lspci ${pkgs.pciutils}/bin/lspci \
+                  --replace setpci ${pkgs.pciutils}/bin/setpci
               ''
             else ''
               # Move path for vgpuConfig.xml into /etc
               sed -i 's|/usr/share/nvidia/vgpu|/etc/nvidia-vgpu-xxxxx|' nvidia-vgpud
 
               substituteInPlace sriov-manage \
-                --replace lspci ${pciutils}/bin/lspci \
-                --replace setpci ${pciutils}/bin/setpci
+                --replace lspci ${pkgs.pciutils}/bin/lspci \
+                --replace setpci ${pkgs.pciutils}/bin/setpci
             '';
 
           # HACK: Using preFixup instead of postInstall
@@ -183,7 +176,7 @@ in {
         serviceConfig = {
           Type = "forking";
           ExecStart = "${lib.getBin config.hardware.nvidia.package}/bin/nvidia-vgpud";
-          ExecStopPost = "${coreutils}/bin/rm -rf /var/run/nvidia-vgpud";
+          ExecStopPost = "${pkgs.coreutils}/bin/rm -rf /var/run/nvidia-vgpud";
           Environment = ["__RM_NO_VERSION_CHECK=1"]; # Avoids issue with API version incompatibility when merging host/client drivers
         };
       };
@@ -197,7 +190,7 @@ in {
           Type = "forking";
           KillMode = "process";
           ExecStart = "${lib.getBin config.hardware.nvidia.package}/bin/nvidia-vgpu-mgr";
-          ExecStopPost = "${coreutils}/bin/rm -rf /var/run/nvidia-vgpu-mgr";
+          ExecStopPost = "${pkgs.coreutils}/bin/rm -rf /var/run/nvidia-vgpu-mgr";
           Environment = ["__RM_NO_VERSION_CHECK=1"];
         };
       };
@@ -206,16 +199,15 @@ in {
 
       boot.kernelModules = ["nvidia-vgpu-vfio"];
 
-      environment.systemPackages = [mdevctl];
-      services.udev.packages = [mdevctl];
+      environment.systemPackages = [pkgs.mdevctl];
+      services.udev.packages = [pkgs.mdevctl];
     })
     (lib.mkIf cfg.fastapi-dls.enable {
       virtualisation.oci-containers.containers = {
         fastapi-dls = {
-          image = "collinwebdesigns/fastapi-dls";
-          imageFile = dockerTools.pullImage {
+          image = "collinwebdesigns/fastapi-dls:1.3.9";
+          imageFile = pkgs.dockerTools.pullImage {
             imageName = "collinwebdesigns/fastapi-dls";
-            imageTag = "1.3.9";
             imageDigest = "sha256:f12c60e27835f3cf2f43ea358d7c781a521f6427a3fffd1dbb1c876de3e16e70";
             sha256 = "sha256-8Sxg4ng1888vQ+o1jXx4GlIfZCej//0duxyHbePhbnA=";
           };
