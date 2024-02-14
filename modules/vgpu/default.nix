@@ -2,7 +2,6 @@
   lib,
   config,
   pkgs,
-  frida,
   ...
 }: let
   gnrl = "535.129.03";
@@ -17,7 +16,6 @@
 in let
   #!! Todo upstream the vgpu-unlock and patch
   cfg = config.hardware.nvidia.vgpu;
-  frida = frida.packages.${pkgs.system}.frida-tools;
 
   compiled-driver = pkgs.stdenv.mkDerivation rec {
     name = "driver-compile";
@@ -71,7 +69,7 @@ in let
       sha256 = "sha256-K7e/9q7DmXrrIFu4gsTv667bEOxRn6nTJYozP1+RGHs=";
     };
 
-    propagatedBuildInputs = [frida];
+    propagatedBuildInputs = [pkgs.frida-tools];
 
     # Disable running checks during the build
     doCheck = false;

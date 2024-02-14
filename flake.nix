@@ -6,7 +6,6 @@
     flake-parts.url = "github:hercules-ci/flake-parts";
     pre-commit-hooks-nix.url = "github:cachix/pre-commit-hooks.nix";
     devshell.url = "github:numtide/devshell";
-    frida.url = "github:itstarsun/frida-nix";
   };
 
   outputs = {self, ...} @ inputs:
@@ -15,7 +14,7 @@
         inherit (inputs.nixpkgs) lib;
         inherit (inputs) frida;
       in {
-        nvidiaVgpu = import ./modules/vgpu/default.nix frida;
+        nvidiaVgpu = import ./modules/vgpu/default.nix;
         default = throw (lib.mdDoc ''
           The usage of default module is deprecated
           ${builtins.concatStringsSep "\n" (lib.filter (name: name != "default") (lib.attrNames self.nixosModules))}
