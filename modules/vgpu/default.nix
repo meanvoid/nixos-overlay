@@ -5,8 +5,10 @@
   fetchFromGitHub,
   fetchurl,
   fetchurlBoot,
+  dockerTools,
   p7zip,
   coreutils,
+  pciutils,
 }:
 with lib; let
   gnrl = "535.129.03";
@@ -136,16 +138,16 @@ in {
                 sed -i 's|/usr/share/nvidia/vgpu|/etc/nvidia-vgpu-xxxxx|' nvidia-vgpud
 
                 substituteInPlace sriov-manage \
-                  --replace lspci ${pkgs.pciutils}/bin/lspci \
-                  --replace setpci ${pkgs.pciutils}/bin/setpci
+                  --replace lspci ${pciutils}/bin/lspci \
+                  --replace setpci ${pciutils}/bin/setpci
               ''
             else ''
               # Move path for vgpuConfig.xml into /etc
               sed -i 's|/usr/share/nvidia/vgpu|/etc/nvidia-vgpu-xxxxx|' nvidia-vgpud
 
               substituteInPlace sriov-manage \
-                --replace lspci ${pkgs.pciutils}/bin/lspci \
-                --replace setpci ${pkgs.pciutils}/bin/setpci
+                --replace lspci ${pciutils}/bin/lspci \
+                --replace setpci ${pciutils}/bin/setpci
             '';
 
           # HACK: Using preFixup instead of postInstall
@@ -156,7 +158,7 @@ in {
               for i in libnvidia-vgpu.so.${vgpu} libnvidia-vgxcfg.so.${vgpu}; do
                 install -Dm755 "$i" "$out/lib/$i"
               done
-              patchelf --set-rpath ${pkgs.stdenv.cc.cc.lib}/lib $out/lib/libnvidia-vgpu.so.${vgpu}
+              patchelf --set-rpath ${stdenv.cc.cc.lib}/lib $out/lib/libnvidia-vgpu.so.${vgpu}
               install -Dm644 vgpuConfig.xml $out/vgpuConfig.xml
 
               for i in nvidia-vgpud nvidia-vgpu-mgr; do
@@ -178,7 +180,7 @@ in {
         serviceConfig = {
           Type = "forking";
           ExecStart = "${lib.getBin config.hardware.nvidia.package}/bin/nvidia-vgpud";
-          ExecStopPost = "${pkgs.coreutils}/bin/rm -rf /var/run/nvidia-vgpud";
+          ExecStopPost = "${coreutils}/bin/rm -rf /var/run/nvidia-vgpud";
           Environment = ["__RM_NO_VERSION_CHECK=1"]; # Avoids issue with API version incompatibility when merging host/client drivers
         };
       };
@@ -192,7 +194,7 @@ in {
           Type = "forking";
           KillMode = "process";
           ExecStart = "${lib.getBin config.hardware.nvidia.package}/bin/nvidia-vgpu-mgr";
-          ExecStopPost = "${pkgs.coreutils}/bin/rm -rf /var/run/nvidia-vgpu-mgr";
+          ExecStopPost = "${coreutils}/bin/rm -rf /var/run/nvidia-vgpu-mgr";
           Environment = ["__RM_NO_VERSION_CHECK=1"];
         };
       };
@@ -208,7 +210,7 @@ in {
       virtualisation.oci-containers.containers = {
         fastapi-dls = {
           image = "collinwebdesigns/fastapi-dls";
-          imageFile = pkgs.dockerTools.pullImage {
+          imageFile = dockerTools.pullImage {
             imageName = "collinwebdesigns/fastapi-dls";
             imageTag = "1.3.9";
             imageDigest = "sha256:f12c60e27835f3cf2f43ea358d7c781a521f6427a3fffd1dbb1c876de3e16e70";
@@ -251,7 +253,7 @@ in {
       };
 
       systemd.services.fastapi-dls-mgr = {
-        path = [pkgs.openssl];
+        path = [openssl];
         script = ''
           WORKING_DIR=${cfg.fastapi-dls.docker-directory}/fastapi-dls/cert
           CERT_CHANGED=false
