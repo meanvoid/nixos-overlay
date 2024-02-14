@@ -39,14 +39,14 @@
 in
   stdenvNoCC.mkDerivation rec {
     pname = "anime-cursors";
-    version = "c605694";
+    version = "f86dc62";
     dontBuild = true;
 
     src = fetchFromGitHub {
       owner = "ashuramaruzxc";
       repo = "anime-cursors";
       rev = "${version}";
-      sha256 = "sha256-7iXjc3SqIZFXpj0jkoiNHHxYz5GHKnzAajh/ga2paD8=";
+      sha256 = "sha256-SjBEShR+g/RT2aILRz/g/ORe1jVRpxjwi0GLW7Un4Q0=";
       sparseCheckout = ["cursors"];
     };
 
