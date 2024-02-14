@@ -11,6 +11,8 @@
   pciutils,
   mdevctl,
   unzip,
+  bash,
+  zstd,
 }: let
   gnrl = "535.129.03";
   vgpu = "535.129.03";
