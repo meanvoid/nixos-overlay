@@ -152,9 +152,15 @@ in {
       environment.etc."nvidia-vgpu-xxxxx/vgpuConfig.xml".source = config.hardware.nvidia.package + /vgpuConfig.xml;
 
       boot.kernelModules = ["nvidia-vgpu-vfio"];
+      boot.blacklistedKernelModules = ["nouveau"];
+      # just in case we blocklist nouveau driver
+      # and add workarounds
+      boot.extraModprobeConfig = ''
+        blacklist nouveau
 
-      environment.systemPackages = [mdevctl];
-      services.udev.packages = [mdevctl];
+        options nvidia cudahost=1 vup_sunlock=1 vup_swrlwar=1 vup_qmode=1
+      '';
+      programs.mdevctl.enable = true;
     })
     (lib.mkIf cfg.fastapi-dls.enable {
       virtualisation.oci-containers.containers = {
