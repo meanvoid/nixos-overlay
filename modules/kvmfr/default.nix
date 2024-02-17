@@ -1,52 +1,51 @@
 {
+  config,
   lib,
   pkgs,
-  config,
   ...
-}:
-with lib; let
+}: let
   cfg = config.virtualisation.kvmfr;
 in {
   options.virtualisation.kvmfr = {
-    enable = mkEnableOption "Kvmfr";
+    enable = lib.mkEnableOption "Kvmfr";
 
     shm = {
-      enable = mkEnableOption "shm";
+      enable = lib.mkEnableOption "shm";
 
-      size = mkOption {
-        type = types.int;
+      size = lib.mkOption {
+        type = lib.types.int;
         default = "128";
         description = "Size of the shared memory device in megabytes.";
       };
-      user = mkOption {
-        type = types.str;
+      user = lib.mkOption {
+        type = lib.types.str;
         default = "root";
         description = "Owner of the shared memory device.";
       };
-      group = mkOption {
-        type = types.str;
+      group = lib.mkOption {
+        type = lib.types.str;
         default = "root";
         description = "Group of the shared memory device.";
       };
-      mode = mkOption {
-        type = types.str;
+      mode = lib.mkOption {
+        type = lib.types.str;
         default = "0600";
         description = "Mode of the shared memory device.";
       };
     };
   };
 
-  config = mkIf cfg.enable {
+  config = lib.mkIf cfg.enable {
     boot.extraModulePackages = with config.boot.kernelPackages; [
       (pkgs.callPackage ./looking-glass.nix {inherit kernel;})
     ];
     boot.initrd.kernelModules = ["kvmfr"];
 
-    boot.kernelParams = optionals cfg.shm.enable [
+    boot.kernelParams = lib.optionals cfg.shm.enable [
       "kvmfr.static_size_mb=${toString cfg.shm.size}"
     ];
 
-    services.udev.extraRules = optionals cfg.shm.enable ''
+    services.udev.extraRules = lib.optionals cfg.shm.enable ''
       SUBSYSTEM=="kvmfr", OWNER="${cfg.shm.user}", GROUP="${cfg.shm.group}", MODE="${cfg.shm.mode}"
     '';
   };
