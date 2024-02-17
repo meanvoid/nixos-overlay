@@ -165,11 +165,11 @@ in {
     (lib.mkIf cfg.fastapi-dls.enable {
       virtualisation.oci-containers.containers = {
         fastapi-dls = {
-          image = "collinwebdesigns/fastapi-dls:1.3.9";
+          image = "collinwebdesigns/fastapi-dls";
           imageFile = dockerTools.pullImage {
             imageName = "collinwebdesigns/fastapi-dls";
-            imageDigest = "sha256:f12c60e27835f3cf2f43ea358d7c781a521f6427a3fffd1dbb1c876de3e16e70";
-            sha256 = "sha256-OSr7XtVmTTaKmiYKxRz2jePfNW87qIquznM/ZP+rXFY=";
+            imageDigest = "sha256:6fa90ce552c4e9ecff9502604a4fd42b3e67f52215eb6d8de03a5c3d20cd03d1";
+            sha256 = "sha256-Crt5+smOuQ67pZH6g09crP9NO5h2zo/++L0rrGIVxPg=";
           };
           volumes = [
             "${cfg.fastapi-dls.docker-directory}/fastapi-dls/cert:/app/cert:rw"
