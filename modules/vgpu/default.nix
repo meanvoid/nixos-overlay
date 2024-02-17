@@ -1,6 +1,7 @@
 {
   lib,
   config,
+  pkgs,
   stdenv,
   vgpu_unlock,
   compile-driver,

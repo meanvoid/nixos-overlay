@@ -1,5 +1,6 @@
 {
   lib,
+  pkgs,
   python3Packages,
   fetchFromGitHub,
   writeText,
