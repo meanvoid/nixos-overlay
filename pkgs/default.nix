@@ -30,8 +30,8 @@
       thcrap-proton = pkgs.callPackage ./games/steam/thcrap-proton {};
       anime-cursors = pkgs.callPackage ./cursors/anime-cursors {};
 
-      # modules
-      vgpu-unwrapped = pkgs.callPackage ../modules/vgpu/derivation.nix {};
+      vgpu_unlock = pkgs.callPackage ../modules/vgpu/vgpu_unlock.nix {};
+      compile-driver = pkgs.callPackage ../modules/vgpu/compile-driver.nix {};
     };
   };
 }

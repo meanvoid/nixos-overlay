@@ -1,86 +1,22 @@
 {
   lib,
   config,
-  pkgs,
+  stdenv,
+  vgpu_unlock,
+  compile-driver,
+  pciutils,
+  coreutils,
+  dockerTools,
   ...
-}: let
+}:
+with lib; let
   gnrl = "535.129.03";
   vgpu = "535.129.03";
   grid = "535.129.03";
   wdys = "537.70";
   grid-version = "16.2";
-  kernel-at-least-6 =
-    if lib.strings.versionAtLeast config.boot.kernelPackages.kernel.version "6.0"
-    then "true"
-    else "false";
-in let
-  #!! Todo upstream the vgpu-unlock and patch
+
   cfg = config.hardware.nvidia.vgpu;
-
-  compiled-driver = pkgs.stdenv.mkDerivation rec {
-    name = "driver-compile";
-    system = "x86_64-linux";
-
-    src = pkgs.fetchFromGitHub {
-      owner = "VGPU-Community-Drivers";
-      repo = "vGPU-Unlock-patcher";
-      rev = "e5288921f79b28590caec6b5249bcac92b6641cb";
-      sha256 = "sha256-dt6aWul7vZ7fiNgLDsyF9+MXDjIDxGagQ0HzU2NOb8U=";
-      fetchSubmodules = true;
-    };
-    generalDriver = pkgs.fetchurl {
-      url = "https://download.nvidia.com/XFree86/Linux-x86_64/${gnrl}/NVIDIA-Linux-x86_64-${gnrl}.run";
-      sha256 = "sha256-5tylYmomCMa7KgRs/LfBrzOLnpYafdkKwJu4oSb/AC4=";
-    };
-    vgpuDriver = pkgs.stdenv.fetchurlBoot {
-      url = "https://www.tenjin-dk.com/archive/nvidia/NVIDIA-Linux-x86_64-535.129.03-vgpu-kvm.run";
-      sha256 = "sha256-KlOUDaFsfIvwAeXaD1OYMZL00J7ITKtxP7tCSsEd90M=";
-    };
-
-    nativeBuildInputs = [pkgs.coreutils pkgs.unzip pkgs.bash pkgs.zstd];
-
-    buildPhase = ''
-      mkdir -p $out
-      cd $TEMPDIR
-
-      cp -a $src/* .
-      patchShebangs .
-
-      # Copy the driver to the current directory
-      cp -a $vgpuDriver NVIDIA-Linux-x86_64-${vgpu}-vgpu-kvm.run
-      cp -a $generalDriver NVIDIA-Linux-x86_64-${gnrl}.run
-
-      if ${kernel-at-least-6}; then
-        bash ./patch.sh --repack general-merge
-      else
-        bash ./patch.sh --repack general-merge
-      fi
-      cp -a NVIDIA-Linux-x86_64-${gnrl}-merged-vgpu-kvm-patched.run $out
-    '';
-  };
-  vgpu_unlock = pkgs.python310Packages.buildPythonPackage {
-    pname = "nvidia-vgpu-unlock";
-    version = "unstable-2021-04-22";
-
-    src = pkgs.fetchFromGitHub {
-      owner = "Yeshey";
-      repo = "vgpu_unlock";
-      rev = "7db331d4a2289ff6c1fb4da50cf445d9b4227421";
-      sha256 = "sha256-K7e/9q7DmXrrIFu4gsTv667bEOxRn6nTJYozP1+RGHs=";
-    };
-
-    propagatedBuildInputs = [pkgs.frida-tools];
-
-    # Disable running checks during the build
-    doCheck = false;
-
-    installPhase = ''
-      mkdir -p $out/bin
-      cp vgpu_unlock $out/bin/
-      substituteInPlace $out/bin/vgpu_unlock \
-        --replace /bin/bash ${pkgs.bash}/bin/bash
-    '';
-  };
 in {
   options = {
     hardware.nvidia.vgpu = {
@@ -90,9 +26,6 @@ in {
         type = lib.types.bool;
         description = "Unlock vGPU functionality for consumer grade GPUs";
       };
-      # TODO: make source overridable and non dependent on this module
-      # !!
-      # submodules
       fastapi-dls = lib.mkOption {
         description = "Set up fastapi-dls host server";
         type = with lib.types;
@@ -129,7 +62,7 @@ in {
 
   config = lib.mkMerge [
     (lib.mkIf cfg.enable {
-      hardware.nvidia.package = config.boot.kernelPackages.nvidiaPackages.stable.overrideAttrs (
+      hardware.nvidia.package = config.boot.kernelPackages.nvidiaPackages.production.overrideAttrs (
         {
           patches ? [],
           postUnpack ? "",
@@ -144,8 +77,6 @@ in {
           name = "NVIDIA-Linux-x86_64-${gnrl}-merged-vgpu-kvm-patched-${config.boot.kernelPackages.kernel.version}";
           version = "${gnrl}";
 
-          # TODO: move the derivation to other file
-          # the new driver (compiled in a derivation above)
           src = "${compiled-driver}/NVIDIA-Linux-x86_64-${gnrl}-merged-vgpu-kvm-patched.run";
 
           postPatch =
@@ -157,16 +88,16 @@ in {
                 sed -i 's|/usr/share/nvidia/vgpu|/etc/nvidia-vgpu-xxxxx|' nvidia-vgpud
 
                 substituteInPlace sriov-manage \
-                  --replace lspci ${pkgs.pciutils}/bin/lspci \
-                  --replace setpci ${pkgs.pciutils}/bin/setpci
+                  --replace lspci ${pciutils}/bin/lspci \
+                  --replace setpci ${pciutils}/bin/setpci
               ''
             else ''
               # Move path for vgpuConfig.xml into /etc
               sed -i 's|/usr/share/nvidia/vgpu|/etc/nvidia-vgpu-xxxxx|' nvidia-vgpud
 
               substituteInPlace sriov-manage \
-                --replace lspci ${pkgs.pciutils}/bin/lspci \
-                --replace setpci ${pkgs.pciutils}/bin/setpci
+                --replace lspci ${pciutils}/bin/lspci \
+                --replace setpci ${pciutils}/bin/setpci
             '';
 
           # HACK: Using preFixup instead of postInstall
@@ -177,7 +108,7 @@ in {
               for i in libnvidia-vgpu.so.${vgpu} libnvidia-vgxcfg.so.${vgpu}; do
                 install -Dm755 "$i" "$out/lib/$i"
               done
-              patchelf --set-rpath ${pkgs.stdenv.cc.cc.lib}/lib $out/lib/libnvidia-vgpu.so.${vgpu}
+              patchelf --set-rpath ${stdenv.cc.cc.lib}/lib $out/lib/libnvidia-vgpu.so.${vgpu}
               install -Dm644 vgpuConfig.xml $out/vgpuConfig.xml
 
               for i in nvidia-vgpud nvidia-vgpu-mgr; do
@@ -198,12 +129,8 @@ in {
 
         serviceConfig = {
           Type = "forking";
-          ExecStart = lib.strings.concatStringsSep " " [
-            # Won't this just break if cfg.unlock.enable = false?
-            (lib.optionalString cfg.unlock.enable "${vgpu_unlock}/bin/vgpu_unlock")
-            "${lib.getBin config.hardware.nvidia.package}/bin/nvidia-vgpud"
-          ];
-          ExecStopPost = "${pkgs.coreutils}/bin/rm -rf /var/run/nvidia-vgpud";
+          ExecStart = "${vgpu_unlock}/bin/vgpu_unlock ${lib.getBin config.hardware.nvidia.package}/bin/nvidia-vgpud";
+          ExecStopPost = "${coreutils}/bin/rm -rf /var/run/nvidia-vgpud";
           Environment = ["__RM_NO_VERSION_CHECK=1"]; # Avoids issue with API version incompatibility when merging host/client drivers
         };
       };
@@ -216,12 +143,8 @@ in {
         serviceConfig = {
           Type = "forking";
           KillMode = "process";
-          ExecStart = lib.strings.concatStringsSep " " [
-            # Won't this just break if cfg.unlock.enable = false?
-            (lib.optionalString cfg.unlock.enable "${vgpu_unlock}/bin/vgpu_unlock")
-            "${lib.getBin config.hardware.nvidia.package}/bin/nvidia-vgpu-mgr"
-          ];
-          ExecStopPost = "${pkgs.coreutils}/bin/rm -rf /var/run/nvidia-vgpu-mgr";
+          ExecStart = "${vgpu_unlock}/bin/vgpu_unlock ${lib.getBin config.hardware.nvidia.package}/bin/nvidia-vgpu-mgr";
+          ExecStopPost = "${coreutils}/bin/rm -rf /var/run/nvidia-vgpu-mgr";
           Environment = ["__RM_NO_VERSION_CHECK=1"];
         };
       };
@@ -230,14 +153,14 @@ in {
 
       boot.kernelModules = ["nvidia-vgpu-vfio"];
 
-      environment.systemPackages = [pkgs.mdevctl];
-      services.udev.packages = [pkgs.mdevctl];
+      environment.systemPackages = [mdevctl];
+      services.udev.packages = [mdevctl];
     })
     (lib.mkIf cfg.fastapi-dls.enable {
       virtualisation.oci-containers.containers = {
         fastapi-dls = {
           image = "collinwebdesigns/fastapi-dls:1.3.9";
-          imageFile = pkgs.dockerTools.pullImage {
+          imageFile = dockerTools.pullImage {
             imageName = "collinwebdesigns/fastapi-dls";
             imageDigest = "sha256:f12c60e27835f3cf2f43ea358d7c781a521f6427a3fffd1dbb1c876de3e16e70";
             sha256 = "sha256-OSr7XtVmTTaKmiYKxRz2jePfNW87qIquznM/ZP+rXFY=";
@@ -279,7 +202,7 @@ in {
       };
 
       systemd.services.fastapi-dls-mgr = {
-        # path = [openssl];
+        path = [openssl];
         script = ''
           WORKING_DIR=${cfg.fastapi-dls.docker-directory}/fastapi-dls/cert
           CERT_CHANGED=false
