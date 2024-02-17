@@ -62,7 +62,7 @@ in
 
     # TODO: make this overridable
     vgpuDriver = stdenv.fetchurlBoot {
-      url = "https://www.tenjin-dk.com/archive/nvidia/${grid}/Host_Driver/NVIDIA-Linux-x86_64-${vgpu}-vgpu-kvm.run";
+      url = "https://www.tenjin-dk.com/archive/nvidia/${grid-version}/Host_Driver/NVIDIA-Linux-x86_64-${vgpu}-vgpu-kvm.run";
       sha256 = "sha256-KlOUDaFsfIvwAeXaD1OYMZL00J7ITKtxP7tCSsEd90M=";
     };
 
