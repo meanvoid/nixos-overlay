@@ -5,7 +5,6 @@
   stdenv,
   pciutils,
   coreutils,
-  dockerTools,
   openssl,
   ...
 }: let
@@ -166,7 +165,7 @@ in {
       virtualisation.oci-containers.containers = {
         fastapi-dls = {
           image = "collinwebdesigns/fastapi-dls";
-          imageFile = dockerTools.pullImage {
+          imageFile = pkgs.dockerTools.pullImage {
             imageName = "collinwebdesigns/fastapi-dls";
             imageDigest = "sha256:6fa90ce552c4e9ecff9502604a4fd42b3e67f52215eb6d8de03a5c3d20cd03d1";
             sha256 = "sha256-Crt5+smOuQ67pZH6g09crP9NO5h2zo/++L0rrGIVxPg=";
