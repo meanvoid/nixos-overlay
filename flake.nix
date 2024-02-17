@@ -28,7 +28,7 @@
           ...
         }: {
           imports = [
-            ./modules/default.nix
+            ./modules/vgpu/default.nix
             ./modules/vgpu/compile-driver.nix
             ./modules/vgpu/vgpu_unlock.nix
           ];
