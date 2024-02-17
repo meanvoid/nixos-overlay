@@ -22,6 +22,7 @@
           ${builtins.concatStringsSep "\n" (lib.filter (name: name != "default") (lib.attrNames self.nixosModules))}
         '');
         nvidia-vGPU = import ./modules/vgpu/default.nix;
+        kvmfr = import ./modules/kvmfr/default.nix;
       };
 
       imports = [
