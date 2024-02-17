@@ -9,7 +9,7 @@
   grid = "535.129.03";
   wdys = "537.70";
   grid-version = "16.2";
-  compile-driver = ./compile-driver.nix {};
+  compile-driver = pkgs.callPackage ./compile-driver.nix {};
   vgpu_unlock = pkgs.callPackage ./vgpu_unlock.nix {};
   cfg = config.hardware.nvidia.vgpu;
 in {
