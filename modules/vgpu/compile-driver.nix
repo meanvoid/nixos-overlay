@@ -1,7 +1,7 @@
 {
+  config,
   lib,
   pkgs,
-  config,
   stdenv,
   fetchFromGitHub,
   fetchurl,

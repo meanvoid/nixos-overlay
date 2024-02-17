@@ -21,18 +21,7 @@
           The usage of default module is deprecated
           ${builtins.concatStringsSep "\n" (lib.filter (name: name != "default") (lib.attrNames self.nixosModules))}
         '');
-        nvidia-vGPU = {
-          self,
-          lib,
-          pkgs,
-          ...
-        }: {
-          imports = [
-            ./modules/vgpu/default.nix
-            ./modules/vgpu/compile-driver.nix
-            ./modules/vgpu/vgpu_unlock.nix
-          ];
-        };
+        nvidia-vGPU = import ./modules/vgpu/default.nix;
       };
 
       imports = [
