@@ -3,14 +3,14 @@
   config,
   pkgs,
   stdenv,
-  vgpu_unlock,
-  compile-driver,
   pciutils,
   coreutils,
   dockerTools,
+  compile-driver,
+  vgpu_unlock,
+  openssl,
   ...
-}:
-with lib; let
+}: let
   gnrl = "535.129.03";
   vgpu = "535.129.03";
   grid = "535.129.03";
@@ -78,7 +78,7 @@ in {
           name = "NVIDIA-Linux-x86_64-${gnrl}-merged-vgpu-kvm-patched-${config.boot.kernelPackages.kernel.version}";
           version = "${gnrl}";
 
-          src = "${compiled-driver}/NVIDIA-Linux-x86_64-${gnrl}-merged-vgpu-kvm-patched.run";
+          src = "${compile-driver}/NVIDIA-Linux-x86_64-${gnrl}-merged-vgpu-kvm-patched.run";
 
           postPatch =
             if postPatch != null

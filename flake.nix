@@ -10,20 +10,29 @@
   };
 
   outputs = {self, ...} @ inputs:
-    inputs.flake-parts.lib.mkFlake {inherit inputs;} {
+    inputs.flake-parts.lib.mkFlake {
+      inherit inputs;
+    } {
       flake.nixosModules = let
         inherit (inputs.nixpkgs) lib;
-        pkgs = import (inputs.nixpkgs);
-      in {
-        nvidiaVgpu = import ./modules/vgpu/default.nix {
-          # frida = inputs.frida.packages.${pkgs.system}.frida-tools;
-          vgpu_unlock = pkgs.callPackage ./modules/vgpu/vgpu_unlock.nix {};
-          compile-driver = pkgs.callPackage ./modules/vgpu/compile-driver.nix {};
-        };
+        pkgs = import inputs.nixpkgs;
+      in rec {
         default = throw (lib.mdDoc ''
           The usage of default module is deprecated
           ${builtins.concatStringsSep "\n" (lib.filter (name: name != "default") (lib.attrNames self.nixosModules))}
         '');
+        nvidia-vGPU = {
+          self,
+          lib,
+          pkgs,
+          ...
+        }: {
+          imports = [
+            ./modules/default.nix
+            ./modules/vgpu/compile-driver.nix
+            ./modules/vgpu/vgpu_unlock.nix
+          ];
+        };
       };
 
       imports = [
