@@ -1,3 +1,4 @@
+#! taken from https://github.com/NixOS/nixpkgs/blob/master/pkgs/applications/misc/gradience/default.nix
 {
   stdenv,
   lib,
@@ -75,7 +76,6 @@ python3Packages.buildPythonApplication rec {
   ];
 
   preFixup = ''
-
     makeWrapperArgs+=("''${gappsWrapperArgs[@]}")
   '';
 

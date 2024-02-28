@@ -33,6 +33,7 @@
       vgpu_unlock = pkgs.callPackage ../modules/vgpu/vgpu_unlock.nix {};
       compile-driver = pkgs.callPackage ../modules/vgpu/compile-driver.nix {};
       gradience-git = pkgs.callPackage ./misc/gradience-git {};
+      gradience-devel = pkgs.callPackage ./misc/gradience-devel {};
     };
   };
 }
