@@ -3,7 +3,9 @@
   stdenvNoCC,
   fetchFromGitHub,
   unzip,
-}: let
+}:
+let
+  # Credit: https://github.com/NixOS/nixpkgs/blob/master/pkgs/data/icons/catppuccin-cursors/default.nix
   # dimensions = {
   #   palette = [ "Frappe" "Latte" "Macchiato" "Mocha" ];
   #   color = [ "Blue" "Dark" "Flamingo" "Green" "Lavender" "Light" "Maroon" "Mauve" "Peach" "Pink" "Red" "Rosewater" "Sapphire" "Sky" "Teal" "Yellow" ];
@@ -11,7 +13,6 @@
   # product = lib.attrsets.cartesianProductOfSets dimensions;
   # variantName = { palette, color }: (lib.strings.toLower palette) + color;
   # variants = map variantName product;
-  # Credit: https://github.com/NixOS/nixpkgs/blob/master/pkgs/data/icons/catppuccin-cursors/default.nix
   dimensions = {
     variant = [
       "Aya"
@@ -34,48 +35,48 @@
     ];
   };
   product = lib.attrsets.cartesianProductOfSets dimensions;
-  variantName = {variant}: (lib.strings.toLower variant);
+  variantName = { variant }: (lib.strings.toLower variant);
   variants = map variantName product;
 in
-  stdenvNoCC.mkDerivation rec {
-    pname = "anime-cursors";
-    version = "f86dc62";
-    dontBuild = true;
+stdenvNoCC.mkDerivation rec {
+  pname = "anime-cursors";
+  version = "f86dc62";
+  dontBuild = true;
 
-    src = fetchFromGitHub {
-      owner = "ashuramaruzxc";
-      repo = "anime-cursors";
-      rev = "${version}";
-      sha256 = "sha256-tfPvvvthjuVOK+/bE6LW/T6g8ebRxF2QI66WtrCrDg0=";
-      sparseCheckout = ["cursors"];
-    };
+  src = fetchFromGitHub {
+    owner = "ashuramaruzxc";
+    repo = "anime-cursors";
+    rev = "${version}";
+    sha256 = "sha256-tfPvvvthjuVOK+/bE6LW/T6g8ebRxF2QI66WtrCrDg0=";
+    sparseCheckout = [ "cursors" ];
+  };
 
-    nativeBuildInputs = [unzip];
+  nativeBuildInputs = [ unzip ];
 
-    outputs = variants ++ ["out"];
+  outputs = variants ++ [ "out" ];
 
-    outputsToInstall = [];
+  outputsToInstall = [ ];
 
-    installPhase = ''
-      runHook preInstall
+  installPhase = ''
+    runHook preInstall
 
-      for output in $(getAllOutputNames); do
-        if [ "$output" != "out" ]; then
-          local outputDir="''${!output}"
-          local iconsDir="$outputDir"/share/icons
+    for output in $(getAllOutputNames); do
+      if [ "$output" != "out" ]; then
+        local outputDir="''${!output}"
+        local iconsDir="$outputDir"/share/icons
 
-          mkdir -p "$iconsDir"
+        mkdir -p "$iconsDir"
 
-          # Convert to kebab case with the first letter of each word capitalized
-          local variant=$(sed 's/\([A-Z]\)/-\1/g' <<< "$output")
-          local variant=''${variant^}
-          unzip "cursors/$variant.zip" -d "$iconsDir"
-        fi
-      done
+        # Convert to kebab case with the first letter of each word capitalized
+        local variant=$(sed 's/\([A-Z]\)/-\1/g' <<< "$output")
+        local variant=''${variant^}
+        unzip "cursors/$variant.zip" -d "$iconsDir"
+      fi
+    done
 
-      # Needed to prevent breakage
-      mkdir -p "$out"
+    # Needed to prevent breakage
+    mkdir -p "$out"
 
-      runHook postInstall
-    '';
-  }
+    runHook postInstall
+  '';
+}

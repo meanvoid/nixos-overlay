@@ -3,16 +3,18 @@
   lib,
   pkgs,
   ...
-}: let
+}:
+let
   gnrl = "535.129.03";
   vgpu = "535.129.03";
   grid = "535.129.03";
   wdys = "537.70";
   grid-version = "16.2";
-  compile-driver = pkgs.callPackage ./compile-driver.nix {};
-  vgpu_unlock = pkgs.callPackage ./vgpu_unlock.nix {};
+  compile-driver = pkgs.callPackage ./compile-driver.nix { };
+  vgpu_unlock = pkgs.callPackage ./vgpu_unlock.nix { };
   cfg = config.hardware.nvidia.vgpu;
-in {
+in
+{
   options = {
     hardware.nvidia.vgpu = {
       enable = lib.mkEnableOption "vGPU support";
@@ -23,7 +25,8 @@ in {
       };
       fastapi-dls = lib.mkOption {
         description = "Set up fastapi-dls host server";
-        type = with lib.types;
+        type =
+          with lib.types;
           submodule {
             options = {
               enable = lib.mkOption {
@@ -59,12 +62,13 @@ in {
     (lib.mkIf cfg.enable {
       hardware.nvidia.package = config.boot.kernelPackages.nvidiaPackages.production.overrideAttrs (
         {
-          patches ? [],
+          patches ? [ ],
           postUnpack ? "",
           postPatch ? "",
           preFixup ? "",
           ...
-        } @ attrs: {
+        }@attrs:
+        {
           # Overriding https://github.com/NixOS/nixpkgs/blob/master/pkgs/os-specific/linux/nvidia-x11
           # that gets called from the option:
           # hardware.nvidia.package
@@ -75,8 +79,7 @@ in {
           src = "${compile-driver}/NVIDIA-Linux-x86_64-${gnrl}-merged-vgpu-kvm-patched.run";
 
           postPatch =
-            if postPatch != null
-            then
+            if postPatch != null then
               postPatch
               + ''
                 # Move path for vgpuConfig.xml into /etc
@@ -86,14 +89,15 @@ in {
                   --replace lspci ${pkgs.pkgs.pciutils}/bin/lspci \
                   --replace setpci ${pkgs.pciutils}/bin/setpci
               ''
-            else ''
-              # Move path for vgpuConfig.xml into /etc
-              sed -i 's|/usr/share/nvidia/vgpu|/etc/nvidia-vgpu-xxxxx|' nvidia-vgpud
+            else
+              ''
+                # Move path for vgpuConfig.xml into /etc
+                sed -i 's|/usr/share/nvidia/vgpu|/etc/nvidia-vgpu-xxxxx|' nvidia-vgpud
 
-              substituteInPlace sriov-manage \
-                --replace lspci ${pkgs.pciutils}/bin/lspci \
-                --replace setpci ${pkgs.pciutils}/bin/setpci
-            '';
+                substituteInPlace sriov-manage \
+                  --replace lspci ${pkgs.pciutils}/bin/lspci \
+                  --replace setpci ${pkgs.pciutils}/bin/setpci
+              '';
 
           # HACK: Using preFixup instead of postInstall
           # nvidia-x11 builder.sh doesn't support hooks
@@ -119,35 +123,35 @@ in {
 
       systemd.services.nvidia-vgpud = {
         description = "NVIDIA vGPU Daemon";
-        wants = ["syslog.target"];
-        wantedBy = ["multi-user.target"];
+        wants = [ "syslog.target" ];
+        wantedBy = [ "multi-user.target" ];
 
         serviceConfig = {
           Type = "forking";
           ExecStart = "${vgpu_unlock}/bin/vgpu_unlock ${lib.getBin config.hardware.nvidia.package}/bin/nvidia-vgpud";
           ExecStopPost = "${pkgs.coreutils}/bin/rm -rf /var/run/nvidia-vgpud";
-          Environment = ["__RM_NO_VERSION_CHECK=1"]; # Avoids issue with API version incompatibility when merging host/client drivers
+          Environment = [ "__RM_NO_VERSION_CHECK=1" ]; # Avoids issue with API version incompatibility when merging host/client drivers
         };
       };
 
       systemd.services.nvidia-vgpu-mgr = {
         description = "NVIDIA vGPU Manager Daemon";
-        wants = ["syslog.target"];
-        wantedBy = ["multi-user.target"];
+        wants = [ "syslog.target" ];
+        wantedBy = [ "multi-user.target" ];
 
         serviceConfig = {
           Type = "forking";
           KillMode = "process";
           ExecStart = "${vgpu_unlock}/bin/vgpu_unlock ${lib.getBin config.hardware.nvidia.package}/bin/nvidia-vgpu-mgr";
           ExecStopPost = "${pkgs.coreutils}/bin/rm -rf /var/run/nvidia-vgpu-mgr";
-          Environment = ["__RM_NO_VERSION_CHECK=1"];
+          Environment = [ "__RM_NO_VERSION_CHECK=1" ];
         };
       };
 
       environment.etc."nvidia-vgpu-xxxxx/vgpuConfig.xml".source = config.hardware.nvidia.package + /vgpuConfig.xml;
 
-      boot.kernelModules = ["nvidia-vgpu-vfio"];
-      boot.blacklistedKernelModules = ["nouveau"];
+      boot.kernelModules = [ "nvidia-vgpu-vfio" ];
+      boot.blacklistedKernelModules = [ "nouveau" ];
       # just in case we blocklist nouveau driver
       # and add workarounds
       boot.extraModprobeConfig = ''
@@ -172,28 +176,22 @@ in {
           ];
           # Set environment variables
           environment = {
-            TZ =
-              if cfg.fastapi-dls.timezone == ""
-              then config.time.timeZone
-              else "${cfg.fastapi-dls.timezone}";
-            DLS_URL =
-              if cfg.fastapi-dls.local_ipv4 == ""
-              then config.networking.hostName
-              else "${cfg.fastapi-dls.local_ipv4}";
+            TZ = if cfg.fastapi-dls.timezone == "" then config.time.timeZone else "${cfg.fastapi-dls.timezone}";
+            DLS_URL = if cfg.fastapi-dls.local_ipv4 == "" then config.networking.hostName else "${cfg.fastapi-dls.local_ipv4}";
             DLS_PORT = "443";
             LEASE_EXPIRE_DAYS = "90";
             DATABASE = "sqlite:////app/database/db.sqlite";
             DEBUG = "true";
           };
           # Publish the container's port to the host
-          ports = ["443:443"];
+          ports = [ "443:443" ];
           # Don't start automatically container
           autoStart = false;
         };
       };
 
       systemd.timers.fastapi-dls-mgr = {
-        wantedBy = ["multi-user.target"];
+        wantedBy = [ "multi-user.target" ];
         timerConfig = {
           OnActiveSec = "1s";
           OnUnitActiveSec = "1h";
@@ -203,7 +201,7 @@ in {
       };
 
       systemd.services.fastapi-dls-mgr = {
-        path = [pkgs.openssl];
+        path = [ pkgs.openssl ];
         script = ''
           WORKING_DIR=${cfg.fastapi-dls.docker-directory}/fastapi-dls/cert
           CERT_CHANGED=false

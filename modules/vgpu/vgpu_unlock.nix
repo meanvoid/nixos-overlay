@@ -8,7 +8,8 @@
   bash,
   ...
 }:
-with python3Packages; let
+with python3Packages;
+let
   setupPy = writeText "setup.py" ''
     from setuptools import setup, find_packages
 
@@ -36,30 +37,30 @@ with python3Packages; let
     )
   '';
 in
-  buildPythonPackage rec {
-    pname = "vgpu-unlock";
-    version = "f432ffc";
-    format = "setuptools";
+buildPythonPackage rec {
+  pname = "vgpu-unlock";
+  version = "f432ffc";
+  format = "setuptools";
 
-    src = fetchFromGitHub {
-      owner = "DualCoder";
-      repo = "vgpu_unlock";
-      rev = "f432ffc8b7ed245df8858e9b38000d3b8f0352f4";
-      sha256 = "sha256-o+8j82Ts8/tEREqpNbA5W329JXnwxfPNJoneNE8qcsU=";
-    };
+  src = fetchFromGitHub {
+    owner = "DualCoder";
+    repo = "vgpu_unlock";
+    rev = "f432ffc8b7ed245df8858e9b38000d3b8f0352f4";
+    sha256 = "sha256-o+8j82Ts8/tEREqpNbA5W329JXnwxfPNJoneNE8qcsU=";
+  };
 
-    # Disable running checks during the build
-    doCheck = false;
+  # Disable running checks during the build
+  doCheck = false;
 
-    nativeBuildInputs = [setuptools];
-    propagatedBuildInputs = [frida-python];
+  nativeBuildInputs = [ setuptools ];
+  propagatedBuildInputs = [ frida-python ];
 
-    postPatch = ''
-      # copy seetupPy
-      for i in vgpu_unlock scripts/vgpu-name.sh; do
-        substituteInPlace $i \
-          --replace /bin/bash ${bash}/bin/bash
-      done
-      cp ${setupPy} ${setupPy.name}
-    '';
-  }
+  postPatch = ''
+    # copy seetupPy
+    for i in vgpu_unlock scripts/vgpu-name.sh; do
+      substituteInPlace $i \
+        --replace /bin/bash ${bash}/bin/bash
+    done
+    cp ${setupPy} ${setupPy.name}
+  '';
+}

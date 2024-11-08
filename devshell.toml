@@ -1,7 +1,0 @@
-imports = ["language.c", "git.hooks"]
-
-[devshell]
-name = "Default Shell"
-
-packages = ["nix-index", "nix-prefetch-github", "nix-prefetch-scripts"]
-packagesFrom = ["direnv"]
